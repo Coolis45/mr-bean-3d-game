@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     root: '.',
-    base: './',
+    base: '/mr-bean-3d-game/',
     server: {
         host: true,
         port: 3000
