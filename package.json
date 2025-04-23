@@ -1,0 +1,17 @@
+{
+  "name": "mr-bean-3d-game",
+  "version": "1.0.0",
+  "description": "A 3D Mr. Bean game",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.159.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

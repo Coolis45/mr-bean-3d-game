@@ -1,0 +1,260 @@
+edit_file("index.html", "I will create a complete index.html file with all necessary elements and dependencies.", `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mr. Bean 3D Game</title>
+    <meta name="description" content="Play as Mr. Bean in this 3D adventure game">
+    <meta name="theme-color" content="#87CEEB">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: none;
+        }
+
+        body {
+            overflow: hidden;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        #game-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            z-index: 2;
+        }
+
+        .dialog-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            display: none;
+            z-index: 1000;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .prompt-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            display: none;
+            z-index: 1000;
+        }
+
+        #controls-info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        #fps-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        #mobile-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .mobile-button {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            touch-action: none;
+        }
+
+        #install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            display: none;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #install-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">Loading Mr. Bean's World...</div>
+    <div id="game-container"></div>
+    <div id="controls-info">
+        Controls:<br>
+        WASD - Move<br>
+        E - Interact<br>
+        Mouse - Look around
+    </div>
+    <div id="fps-counter">FPS: 60</div>
+    <div class="dialog-box"></div>
+    <div class="prompt-box">Press E to interact</div>
+
+    <div id="mobile-controls">
+        <div class="mobile-button" id="move-left">←</div>
+        <div class="mobile-button" id="move-right">→</div>
+        <div class="mobile-button" id="interact">E</div>
+    </div>
+
+    <div id="install-prompt">
+        Install this game on your iPhone for a better experience!
+        <button id="install-button">Install</button>
+    </div>
+
+    <!-- Import maps for ES modules -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/",
+                "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.159.0/examples/jsm/controls/OrbitControls.js",
+                "three/examples/jsm/loaders/GLTFLoader": "https://unpkg.com/three@0.159.0/examples/jsm/loaders/GLTFLoader.js"
+            }
+        }
+    </script>
+
+    <!-- Main game script -->
+    <script type="module" src="src/main.js"></script>
+
+    <!-- PWA and mobile support -->
+    <script>
+        // Check if the app is installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            document.getElementById('install-prompt').style.display = 'none';
+        } else {
+            // Show install prompt for iOS
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                document.getElementById('install-prompt').style.display = 'block';
+            }
+        }
+
+        // Handle install button
+        document.getElementById('install-button').addEventListener('click', () => {
+            document.getElementById('install-prompt').style.display = 'none';
+        });
+
+        // Mobile controls
+        const mobileControls = {
+            left: false,
+            right: false,
+            interact: false
+        };
+
+        // Touch event handlers
+        document.getElementById('move-left').addEventListener('touchstart', () => mobileControls.left = true);
+        document.getElementById('move-left').addEventListener('touchend', () => mobileControls.left = false);
+        document.getElementById('move-right').addEventListener('touchstart', () => mobileControls.right = true);
+        document.getElementById('move-right').addEventListener('touchend', () => mobileControls.right = false);
+        document.getElementById('interact').addEventListener('touchstart', () => mobileControls.interact = true);
+        document.getElementById('interact').addEventListener('touchend', () => mobileControls.interact = false);
+
+        // Loading screen handler
+        window.addEventListener('load', () => {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 1000);
+            }
+
+            // FPS Counter
+            const fpsCounter = document.getElementById('fps-counter');
+            let frameCount = 0;
+            let lastTime = performance.now();
+
+            function updateFPS() {
+                frameCount++;
+                const currentTime = performance.now();
+                
+                if (currentTime - lastTime >= 1000) {
+                    const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                    fpsCounter.textContent = `FPS: ${fps}`;
+                    frameCount = 0;
+                    lastTime = currentTime;
+                }
+                
+                requestAnimationFrame(updateFPS);
+            }
+
+            updateFPS();
+        });
+    </script>
+</body>
+</html>`
