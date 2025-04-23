@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { OutlineEffect } from 'three/examples/jsm/effects/OutlineEffect';
+import * as THREE from './three.module.js';
+import { OrbitControls } from './jsm/controls/OrbitControls.js';
+import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+import { OutlineEffect } from './jsm/effects/OutlineEffect.js';
 
 class MrBeanGame {
     constructor() {
@@ -15,19 +15,41 @@ class MrBeanGame {
 
     initialize() {
         try {
+            // Create necessary DOM elements first
+            const gameContainer = document.createElement('div');
+            gameContainer.id = 'game-container';
+            document.body.appendChild(gameContainer);
+
+            const loadingScreen = document.createElement('div');
+            loadingScreen.id = 'loading-screen';
+            loadingScreen.style.position = 'fixed';
+            loadingScreen.style.top = '0';
+            loadingScreen.style.left = '0';
+            loadingScreen.style.width = '100%';
+            loadingScreen.style.height = '100%';
+            loadingScreen.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            loadingScreen.style.display = 'flex';
+            loadingScreen.style.justifyContent = 'center';
+            loadingScreen.style.alignItems = 'center';
+            loadingScreen.style.zIndex = '1000';
+            document.body.appendChild(loadingScreen);
+
+            // Set loading screen content
+            loadingScreen.innerHTML = '<div style="text-align: center; color: white;"><h2>Loading Mr. Bean\'s World...</h2><p>Please wait while we prepare everything!</p></div>';
+
             // Create scene with fog for depth
             this.scene = new THREE.Scene();
             this.scene.background = new THREE.Color(0x87CEEB); // Light blue sky
-            this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.012); // Reduced fog density
+            this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
 
             // Create camera with position behind Mr. Bean
             this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             
             // Initialize camera settings first
             this.thirdPersonCameraOffset = new THREE.Vector3(0, 3, -6);
-            this.firstPersonCameraOffset = new THREE.Vector3(0, 1.7, 0.3); // Eye level
+            this.firstPersonCameraOffset = new THREE.Vector3(0, 1.7, 0.3);
             this.cameraOffset = this.thirdPersonCameraOffset.clone();
-            this.smoothFactor = 0.15; // Camera smoothing factor
+            this.smoothFactor = 0.15;
             
             // Set initial camera position
             this.camera.position.set(-38, 3, -34);
@@ -37,30 +59,49 @@ class MrBeanGame {
             this.frustum = new THREE.Frustum();
             this.cameraViewProjectionMatrix = new THREE.Matrix4();
             
-            // Performance optimization: Reduce shadow map size but keep quality
+            // Mobile-optimized renderer settings
             this.renderer = new THREE.WebGLRenderer({ 
-                antialias: true,
+                antialias: false,
                 powerPreference: "high-performance",
-                precision: "mediump"
+                precision: "mediump",
+                alpha: true,
+                canvas: document.createElement('canvas')
             });
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Adjust renderer size and pixel ratio
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            this.renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
+            this.renderer.setSize(window.innerWidth, window.innerHeight, false);
+            
+            // Ensure the renderer is properly sized
+            this.renderer.domElement.style.width = '100%';
+            this.renderer.domElement.style.height = '100%';
+            this.renderer.domElement.style.position = 'fixed';
+            this.renderer.domElement.style.top = '0';
+            this.renderer.domElement.style.left = '0';
+            
+            // Enable and optimize shadows
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             
-            // Optimize shadow settings
-            const shadowMapSize = 1024;
+            // Append renderer to container
+            gameContainer.appendChild(this.renderer.domElement);
+
+            // Initialize game state with improved movement values
+            if (isMobile) {
+                this.renderer.setPixelRatio(1); // Force 1:1 pixel ratio on mobile
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            } else {
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            
+            // Optimize shadows for mobile
+            this.renderer.shadowMap.enabled = true;
+            this.renderer.shadowMap.type = THREE.PCFShadowMap; // Use basic shadow mapping on mobile
             this.renderer.shadowMap.autoUpdate = false;
             this.renderer.shadowMap.needsUpdate = true;
 
-            // Add outline effect for cartoon style
-            this.outlineEffect = new OutlineEffect(this.renderer, {
-                defaultThickness: 0.008,
-                defaultColor: [0, 0, 0],
-                defaultAlpha: 1,
-                defaultKeepAlive: true
-            });
-            
             // Get the container element
             const container = document.getElementById('game-container');
             if (!container) {
@@ -108,10 +149,9 @@ class MrBeanGame {
             this.frameCount = 0;
             this.animate();
 
-            // Hide loading screen
-            const loadingScreen = document.getElementById('loading-screen');
-            if (loadingScreen) {
-                loadingScreen.style.display = 'none';
+            // Hide loading screen when done
+            if (document.getElementById('loading-screen')) {
+                document.getElementById('loading-screen').style.display = 'none';
             }
 
             // Add camera mode tracking
@@ -1811,6 +1851,29 @@ class MrBeanGame {
     }
 
     setupPlayer() {
+        // Create a loading manager to track progress
+        const loadingManager = new THREE.LoadingManager();
+        loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+            const progressLoadingScreen = document.getElementById('loading-screen');
+            if (progressLoadingScreen) {
+                const progress = Math.round((itemsLoaded / itemsTotal) * 100);
+                progressLoadingScreen.innerHTML = `<div style="text-align: center; color: white;"><h2>Loading Mr. Bean's World...</h2><p>${progress}% Complete</p></div>`;
+            }
+        };
+
+        loadingManager.onLoad = () => {
+            const finalLoadingScreen = document.getElementById('loading-screen');
+            if (finalLoadingScreen) {
+                finalLoadingScreen.style.display = 'none';
+            }
+            // Force a shadow map update after loading
+            this.renderer.shadowMap.needsUpdate = true;
+            this.animate();
+        };
+
+        // Use the loading manager for the GLTF loader
+        const loader = new GLTFLoader(loadingManager);
+
         const playerGroup = new THREE.Group();
         
         // Mr. Bean's body - slimmer torso with brown suit
@@ -2046,44 +2109,42 @@ class MrBeanGame {
     }
 
     animate() {
-        const currentTime = performance.now();
-        const deltaTime = (currentTime - this.lastTime) / 1000; // Convert to seconds
-        this.lastTime = currentTime;
+        try {
+            requestAnimationFrame(() => this.animate());
 
-        // Update frustum for culling
-        this.camera.updateMatrixWorld();
-        this.cameraViewProjectionMatrix.multiplyMatrices(
-            this.camera.projectionMatrix,
-            this.camera.matrixWorldInverse
-        );
-        this.frustum.setFromProjectionMatrix(this.cameraViewProjectionMatrix);
+            const currentTime = performance.now();
+            const deltaTime = (currentTime - this.lastTime) / 1000;
+            this.lastTime = currentTime;
 
-        // Update player movement and camera with delta time
-        this.updatePlayer();
-        
-        // Update NPCs with optimized frequency and culling
-        if (this.npcs) {
-            // Only update NPCs every other frame for better performance
-            if (this.frameCount % 2 === 0) {
-                this.updateNPCsWithCulling();
+            // Update FPS counter
+            this.frameCount++;
+            if (currentTime > this.lastTime + 1000) {
+                const fps = Math.round(this.frameCount * 1000 / (currentTime - this.lastTime));
+                const fpsCounter = document.getElementById('fps-counter');
+                if (fpsCounter) {
+                    fpsCounter.textContent = `FPS: ${fps}`;
+                }
+                this.frameCount = 0;
+                this.lastTime = currentTime;
             }
-        }
-        
-        // Render only visible objects
-        this.updateVisibility();
-        
-        // Render the scene with outline effect
-        this.outlineEffect.render(this.scene, this.camera);
 
-        // Update shadow map only when necessary
-        if (this.shadowUpdateNeeded) {
-            this.renderer.shadowMap.needsUpdate = true;
-            this.shadowUpdateNeeded = false;
+            // Only update if the document is visible
+            if (!document.hidden) {
+                this.updatePlayer();
+                this.updateCamera();
+                this.updateNPCs();
+                this.updateVisibility();
+                
+                // Render the scene
+                if (this.outlineEffect) {
+                    this.outlineEffect.render(this.scene, this.camera);
+                } else {
+                    this.renderer.render(this.scene, this.camera);
+                }
+            }
+        } catch (error) {
+            console.error('Animation error:', error);
         }
-
-        // Request next frame with optimized timing
-        this.frameCount = (this.frameCount || 0) + 1;
-        requestAnimationFrame(() => this.animate());
     }
 
     updateVisibility() {

@@ -2,325 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mr. Bean 3D Game</title>
-    <meta name="description" content="Play as Mr. Bean in this 3D adventure game">
-    <meta name="theme-color" content="#87CEEB">
-    <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="./icon-192x192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr Bean 3D Game</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="theme-color" content="#4CAF50">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            touch-action: none;
-        }
-
         body {
+            margin: 0;
             overflow: hidden;
-            background-color: #000;
-            font-family: Arial, sans-serif;
-            position: fixed;
-            width: 100%;
-            height: 100%;
+            background-color: #87CEEB;
         }
-
         #game-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
-            touch-action: none;
         }
-
         #loading-screen {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000;
-            display: flex;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 24px;
-            z-index: 2;
-        }
-
-        .dialog-box {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 5px;
             font-family: Arial, sans-serif;
-            display: none;
-            z-index: 1000;
-            min-width: 200px;
-            text-align: center;
-        }
-
-        .prompt-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-family: Arial, sans-serif;
-            display: none;
-            z-index: 1000;
-        }
-
-        #controls-info {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            z-index: 1000;
-        }
-
-        #fps-counter {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            color: white;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            z-index: 1000;
-        }
-
-        #mobile-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            z-index: 1000;
-            pointer-events: none;
-        }
-
-        .mobile-button {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid white;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 24px;
-            touch-action: none;
-            pointer-events: auto;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        #move-pad {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            touch-action: none;
-            pointer-events: auto;
-        }
-
-        #action-buttons {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 20px;
-        }
-
-        #install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 5px;
-            font-family: Arial, sans-serif;
-            display: none;
-            z-index: 1000;
-            text-align: center;
-        }
-
-        #install-button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-
-        @media (hover: none) {
-            #controls-info {
-                display: none;
-            }
         }
     </style>
 </head>
 <body>
-    <div id="loading-screen">Loading Mr. Bean's World...</div>
+    <div id="loading-screen"></div>
     <div id="game-container"></div>
-    <div id="controls-info">
-        Controls:<br>
-        WASD - Move<br>
-        E - Interact<br>
-        Mouse - Look around
-    </div>
-    <div id="fps-counter">FPS: 60</div>
-    <div class="dialog-box"></div>
-    <div class="prompt-box">Press E to interact</div>
-
-    <div id="mobile-controls">
-        <div id="move-pad"></div>
-        <div id="action-buttons">
-            <div class="mobile-button" id="interact">E</div>
-            <div class="mobile-button" id="jump">↑</div>
-        </div>
-    </div>
-
-    <div id="install-prompt">
-        Install this game on your iPhone for a better experience!
-        <button id="install-button">Install</button>
-    </div>
-
-    <!-- Import maps for ES modules -->
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/",
-                "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.159.0/examples/jsm/controls/OrbitControls.js",
-                "three/examples/jsm/loaders/GLTFLoader": "https://unpkg.com/three@0.159.0/examples/jsm/loaders/GLTFLoader.js"
-            }
+    {
+        "imports": {
+            "three": "./three.module.js",
+            "three/examples/": "./jsm/"
         }
+    }
     </script>
-
-    <!-- Main game script -->
-    <script type="module" src="./src/main.js"></script>
-
-    <!-- PWA and mobile support -->
-    <script>
-        // Check if the app is installed
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            document.getElementById('install-prompt').style.display = 'none';
-        } else {
-            // Show install prompt for iOS
-            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                document.getElementById('install-prompt').style.display = 'block';
-            }
-        }
-
-        // Handle install button
-        document.getElementById('install-button').addEventListener('click', () => {
-            document.getElementById('install-prompt').style.display = 'none';
-        });
-
-        // Mobile controls
-        const movePad = document.getElementById('move-pad');
-        const interactButton = document.getElementById('interact');
-        const jumpButton = document.getElementById('jump');
-
-        let moveTouch = null;
-        let movePosition = { x: 0, y: 0 };
-
-        movePad.addEventListener('touchstart', (e) => {
-            moveTouch = e.touches[0];
-            const rect = movePad.getBoundingClientRect();
-            movePosition = {
-                x: (moveTouch.clientX - rect.left - rect.width / 2) / (rect.width / 2),
-                y: (moveTouch.clientY - rect.top - rect.height / 2) / (rect.height / 2)
-            };
-            e.preventDefault();
-        }, { passive: false });
-
-        movePad.addEventListener('touchmove', (e) => {
-            if (!moveTouch) return;
-            const rect = movePad.getBoundingClientRect();
-            movePosition = {
-                x: (e.touches[0].clientX - rect.left - rect.width / 2) / (rect.width / 2),
-                y: (e.touches[0].clientY - rect.top - rect.height / 2) / (rect.height / 2)
-            };
-            e.preventDefault();
-        }, { passive: false });
-
-        movePad.addEventListener('touchend', () => {
-            moveTouch = null;
-            movePosition = { x: 0, y: 0 };
-        });
-
-        // Expose mobile controls to the game
-        window.mobileControls = {
-            getMovement: () => movePosition,
-            isInteracting: () => interactButton.matches(':active'),
-            isJumping: () => jumpButton.matches(':active')
-        };
-
-        // Loading screen handler
-        window.addEventListener('load', () => {
-            const loadingScreen = document.getElementById('loading-screen');
-            if (loadingScreen) {
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 1000);
-            }
-
-            // FPS Counter
-            const fpsCounter = document.getElementById('fps-counter');
-            let frameCount = 0;
-            let lastTime = performance.now();
-
-            function updateFPS() {
-                frameCount++;
-                const currentTime = performance.now();
-                
-                if (currentTime - lastTime >= 1000) {
-                    const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-                    fpsCounter.textContent = `FPS: ${fps}`;
-                    frameCount = 0;
-                    lastTime = currentTime;
-                }
-                
-                requestAnimationFrame(updateFPS);
-            }
-
-            updateFPS();
-        });
-
-        // Prevent default touch behaviors
-        document.addEventListener('touchmove', (e) => {
-            if (e.target.closest('#move-pad, .mobile-button')) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-    </script>
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>
