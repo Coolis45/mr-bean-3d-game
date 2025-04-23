@@ -2,18 +2,18 @@
   "name": "Mr. Bean 3D Game",
   "short_name": "Mr. Bean Game",
   "description": "Play as Mr. Bean in this 3D adventure game",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#87CEEB",
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "./icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "./icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
